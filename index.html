@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kai's AGLC Citation Generator</title>
+  <meta name="google-adsense-account" content="ca-pub-3578807727190103">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3578807727190103" crossorigin="anonymous"></script>
+</head>
+<body>
+  <!-- Gradient Background -->
+  <div class="gradient-bg"></div>
+  
+  <!-- Particles Background -->
+  <div id="particles-js"></div>
+
+  <!-- Navigation Bar -->
+  <nav>
+    <div class="nav-container">
+      <div class="logo">Kai Watanabe</div>
+      <ul>
+        <li><a href="https://www.kaiwatanabe.com" target="_self" class="nav-link">Home</a></li>
+        <li><a href="https://www.kaiwatanabe.com/AGLC" target="_self" class="nav-link">AGLC</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div id="container">
+    <h1>AGLC Citation Generator</h1>
+    <p class="disclaimer-note">By continuing to use this tool, you agree to the disclaimer.</p>
+
+    <form id="citation-form">
+      <label for="source-type">Source Type <span class="required">*</span>:</label>
+      <select id="source-type" name="source-type" required>
+        <option value="" disabled selected>Select a Source Type</option>
+        <option value="case-domestic">Domestic Case (Australian)</option>
+        <option value="case-international">International Case</option>
+        <option value="book">Book</option>
+        <option value="journal">Journal Article</option>
+        <option value="legislation">Legislation</option>
+        <option value="website">Website</option>
+        <option value="newspaper">Newspaper Article</option>
+        <option value="conference-paper">Conference Paper</option>
+        <option value="thesis">Thesis/Dissertation</option>
+        <option value="report">Report</option>
+        <option value="encyclopedia">Encyclopedia/Dictionary Entry</option>
+      </select>
+
+      <!-- Domestic Case Fields -->
+      <div id="case-domestic-fields" class="citation-fields">
+          <label for="case-domestic-name">Case Name <span class="required">*</span>:</label>
+          <input type="text" id="case-domestic-name" name="case-domestic-name" required>
+
+          <label for="case-domestic-report">Report Series <span class="required">*</span>:</label>
+          <input type="text" id="case-domestic-report" name="case-domestic-report" required>
+
+          <label for="case-domestic-year">Year <span class="required">*</span>:</label>
+          <input type="text" id="case-domestic-year" name="case-domestic-year" required>
+
+          <label for="case-domestic-volume">Volume <span class="required">*</span>:</label>
+          <input type="text" id="case-domestic-volume" name="case-domestic-volume" required>
+
+          <label for="case-domestic-page">Starting Page <span class="required">*</span>:</label>
+          <input type="text" id="case-domestic-page" name="case-domestic-page" required>
+
+          <label for="case-domestic-court">Court <span class="required">*</span>:</label>
+          <input type="text" id="case-domestic-court" name="case-domestic-court" required>
+
+          <label class="checkbox-label">
+              <input type="checkbox" id="case-domestic-pinpoint-toggle"> Add Pinpoint Reference
+          </label>
+
+          <div id="case-domestic-pinpoint-fields" class="citation-fields">
+              <label for="case-domestic-pinpoint-page">Pinpoint Page:</label>
+              <input type="text" id="case-domestic-pinpoint-page" name="case-domestic-pinpoint-page">
+
+              <label for="case-domestic-pinpoint-paragraph">Pinpoint Paragraph:</label>
+              <input type="text" id="case-domestic-pinpoint-paragraph" name="case-domestic-pinpoint-paragraph">
+          </div>
+      </div>
+
+      <!-- International Case Fields -->
+      <div id="case-international-fields" class="citation-fields">
+          <label for="case-international-name">Case Name <span class="required">*</span>:</label>
+          <input type="text" id="case-international-name" name="case-international-name" required>
+
+          <label for="case-international-report">Report Series <span class="required">*</span>:</label>
+          <input type="text" id="case-international-report" name="case-international-report" required>
+
+          <label for="case-international-year">Year <span class="required">*</span>:</label>
+          <input type="text" id="case-international-year" name="case-international-year" required>
+
+          <label for="case-international-volume">Volume:</label>
+          <input type="text" id="case-international-volume" name="case-international-volume">
+
+          <label for="case-international-page">Starting Page:</label>
+          <input type="text" id="case-international-page" name="case-international-page">
+
+          <label for="case-international-court">Court/Tribunal <span class="required">*</span>:</label>
+          <input type="text" id="case-international-court" name="case-international-court" required>
+
+          <label class="checkbox-label">
+              <input type="checkbox" id="case-international-pinpoint-toggle"> Add Pinpoint Reference
+          </label>
+
+          <div id="case-international-pinpoint-fields" class="citation-fields">
+              <label for="case-international-pinpoint-page">Pinpoint Page:</label>
+              <input type="text" id="case-international-pinpoint-page" name="case-international-pinpoint-page">
+
+              <label for="case-international-pinpoint-paragraph">Pinpoint Paragraph:</label>
+              <input type="text" id="case-international-pinpoint-paragraph" name="case-international-pinpoint-paragraph">
+          </div>
+      </div>
+
+      <!-- Book Fields -->
+      <div id="book-fields" class="citation-fields">
+          <label for="book-author">Author <span class="required">*</span>:</label>
+          <input type="text" id="book-author" name="book-author" required>
+
+          <label for="book-title">Title <span class="required">*</span>:</label>
+          <input type="text" id="book-title" name="book-title" required>
+
+          <label for="book-edition">Edition:</label>
+          <input type="text" id="book-edition" name="book-edition">
+
+          <label for="book-year">Year <span class="required">*</span>:</label>
+          <input type="text" id="book-year" name="book-year" required>
+
+          <label for="book-publisher">Publisher <span class="required">*</span>:</label>
+          <input type="text" id="book-publisher" name="book-publisher" required>
+
+          <label class="checkbox-label">
+              <input type="checkbox" id="book-pinpoint-toggle"> Add Pinpoint Reference
+          </label>
+
+          <div id="book-pinpoint-fields" class="citation-fields">
+              <label for="book-pinpoint-page">Pinpoint Page:</label>
+              <input type="text" id="book-pinpoint-page" name="book-pinpoint-page">
+          </div>
+      </div>
+
+      <!-- Journal Fields -->
+      <div id="journal-fields" class="citation-fields">
+          <label for="journal-author">Author <span class="required">*</span>:</label>
+          <input type="text" id="journal-author" name="journal-author" required>
+
+          <label for="journal-title">Title <span class="required">*</span>:</label>
+          <input type="text" id="journal-title" name="journal-title" required>
+
+          <label for="journal-name">Journal Name <span class="required">*</span>:</label>
+          <input type="text" id="journal-name" name="journal-name" required>
+
+          <label for="journal-volume">Volume <span class="required">*</span>:</label>
+          <input type="text" id="journal-volume" name="journal-volume" required>
+
+          <label for="journal-year">Year <span class="required">*</span>:</label>
+          <input type="text" id="journal-year" name="journal-year" required>
+
+          <label for="journal-page">Starting Page <span class="required">*</span>:</label>
+          <input type="text" id="journal-page" name="journal-page" required>
+
+          <label class="checkbox-label">
+              <input type="checkbox" id="journal-pinpoint-toggle"> Add Pinpoint Reference
+          </label>
+
+          <div id="journal-pinpoint-fields" class="citation-fields">
+              <label for="journal-pinpoint-page">Pinpoint Page:</label>
+              <input type="text" id="journal-pinpoint-page" name="journal-pinpoint-page">
+          </div>
+      </div>
+
+      <!-- Legislation Fields -->
+      <div id="legislation-fields" class="citation-fields">
+          <label for="legislation-title">Title <span class="required">*</span>:</label>
+          <input type="text" id="legislation-title" name="legislation-title" required>
+
+          <label for="legislation-year">Year <span class="required">*</span>:</label>
+          <input type="text" id="legislation-year" name="legislation-year" required>
+
+          <label for="legislation-jurisdiction">Jurisdiction <span class="required">*</span>:</label>
+          <input type="text" id="legislation-jurisdiction" name="legislation-jurisdiction" required>
+
+          <label class="checkbox-label">
+              <input type="checkbox" id="legislation-pinpoint-toggle"> Add Pinpoint Reference
+          </label>
+
+          <div id="legislation-pinpoint-fields" class="citation-fields">
+              <label for="legislation-pinpoint-section">Pinpoint Section:</label>
+              <input type="text" id="legislation-pinpoint-section" name="legislation-pinpoint-section">
+
+              <label for="legislation-pinpoint-subsection">Pinpoint Subsection:</label>
+              <input type="text" id="legislation-pinpoint-subsection" name="legislation-pinpoint-subsection">
+          </div>
+      </div>
+
+      <!-- Website Fields -->
+      <div id="website-fields" class="citation-fields">
+          <label for="website-author">Author (if any):</label>
+          <input type="text" id="website-author" name="website-author">
+
+          <label for="website-title">Title <span class="required">*</span>:</label>
+          <input type="text" id="website-title" name="website-title" required>
+
+          <label for="website-name">Website Name <span class="required">*</span>:</label>
+          <input type="text" id="website-name" name="website-name" required>
+
+          <label for="website-url">URL <span class="required">*</span>:</label>
+          <input type="url" id="website-url" name="website-url" required>
+
+          <label for="website-access-date">Access Date <span class="required">*</span>:</label>
+          <input type="text" id="website-access-date" name="website-access-date" placeholder="Select date" required>
+      </div>
+
+      <!-- Newspaper Article Fields -->
+      <div id="newspaper-fields" class="citation-fields">
+          <label for="newspaper-author">Author <span class="required">*</span>:</label>
+          <input type="text" id="newspaper-author" name="newspaper-author">
+
+          <label for="newspaper-title">Title <span class="required">*</span>:</label>
+          <input type="text" id="newspaper-title" name="newspaper-title" required>
+
+          <label for="newspaper-name">Newspaper Name <span class="required">*</span>:</label>
+          <input type="text" id="newspaper-name" name="newspaper-name" required>
+
+          <label for="newspaper-date">Date <span class="required">*</span>:</label>
+          <input type="text" id="newspaper-date" name="newspaper-date" required>
+
+          <label for="newspaper-page">Page Number:</label>
+          <input type="text" id="newspaper-page" name="newspaper-page">
+      </div>
+
+      <!-- Conference Paper Fields -->
+      <div id="conference-paper-fields" class="citation-fields">
+          <label for="conference-author">Author <span class="required">*</span>:</label>
+          <input type="text" id="conference-author" name="conference-author" required>
+
+          <label for="conference-title">Title <span class="required">*</span>:</label>
+          <input type="text" id="conference-title" name="conference-title" required>
+
+          <label for="conference-name">Conference Name <span class="required">*</span>:</label>
+          <input type="text" id="conference-name" name="conference-name" required>
+
+          <label for="conference-location">Location:</label>
+          <input type="text" id="conference-location" name="conference-location">
+
+          <label for="conference-date">Date <span class="required">*</span>:</label>
+          <input type="text" id="conference-date" name="conference-date" required>
+
+          <label for="conference-pages">Pages:</label>
+          <input type="text" id="conference-pages" name="conference-pages">
+      </div>
+
+      <!-- Thesis/Dissertation Fields -->
+      <div id="thesis-fields" class="citation-fields">
+          <label for="thesis-author">Author <span class="required">*</span>:</label>
+          <input type="text" id="thesis-author" name="thesis-author" required>
+
+          <label for="thesis-title">Title <span class="required">*</span>:</label>
+          <input type="text" id="thesis-title" name="thesis-title" required>
+
+          <label for="thesis-type">Thesis Type <span class="required">*</span>:</label>
+          <input type="text" id="thesis-type" name="thesis-type" required>
+
+          <label for="thesis-university">University <span class="required">*</span>:</label>
+          <input type="text" id="thesis-university" name="thesis-university" required>
+
+          <label for="thesis-year">Year <span class="required">*</span>:</label>
+          <input type="text" id="thesis-year" name="thesis-year" required>
+      </div>
+
+      <!-- Report Fields -->
+      <div id="report-fields" class="citation-fields">
+          <label for="report-author">Author <span class="required">*</span>:</label>
+          <input type="text" id="report-author" name="report-author">
+
+          <label for="report-title">Title <span class="required">*</span>:</label>
+          <input type="text" id="report-title" name="report-title" required>
+
+          <label for="report-organization">Organization <span class="required">*</span>:</label>
+          <input type="text" id="report-organization" name="report-organization" required>
+
+          <label for="report-year">Year <span class="required">*</span>:</label>
+          <input type="text" id="report-year" name="report-year" required>
+
+          <label for="report-url">URL (if any):</label>
+          <input type="url" id="report-url" name="report-url">
+      </div>
+
+      <!-- Encyclopedia/Dictionary Entry Fields -->
+      <div id="encyclopedia-fields" class="citation-fields">
+          <label for="encyclopedia-title">Entry Title <span class="required">*</span>:</label>
+          <input type="text" id="encyclopedia-title" name="encyclopedia-title" required>
+
+          <label for="encyclopedia-name">Encyclopedia/Dictionary Name <span class="required">*</span>:</label>
+          <input type="text" id="encyclopedia-name" name="encyclopedia-name" required>
+
+          <label for="encyclopedia-edition">Edition:</label>
+          <input type="text" id="encyclopedia-edition" name="encyclopedia-edition">
+
+          <label for="encyclopedia-year">Year <span class="required">*</span>:</label>
+          <input type="text" id="encyclopedia-year" name="encyclopedia-year" required>
+      </div>
+
+      <!-- Buttons and Citation Display -->
+      <div class="button-group">
+        <button type="button" id="generate-citation" onclick="generateCitation()">Generate Citation</button>
+      </div>
+
+      <div id="citation-result">
+          <h2>Your Citation:</h2>
+          <p id="generated-citation"></p>
+      </div>
+
+      <div class="button-group">
+        <button type="button" id="save-citation" onclick="saveCitation()">Save Citation</button>
+        <span class="save-explanation">(Saving a citation adds it to a list for later export)</span>
+      </div>
+    </form>
+
+    <div id="saved-citations">
+        <h2>Saved Citations:</h2>
+        <ul id="citation-list"></ul>
+        <div class="button-group">
+          <button type="button" class="export-button" onclick="exportCitations()">Export Citations</button>
+          <button type="button" class="clear-button" onclick="clearCitations()">Clear Saved Citations</button>
+        </div>
+    </div>
+  </div>
+
+  <footer>
+      <p>&copy; 2025 Kai Watanabe. All rights reserved. | 
+          <a href="#" id="privacy-policy-link">Privacy Policy</a> |
+          <a href="#" id="equity-statement-link">Equity Statement</a>
+      </p>
+      <div id="disclaimer-content">
+          <p>
+              DISCLAIMER: I strive to ensure that citations generated are AGLC compliant, but there may be errors.
+              Users are responsible for verifying their citations. Due to technical limitations, data loss in the "Save Citation" feature is not the developer's responsibility.
+          </p>
+      </div>
+  </footer>
+
+  <!-- Modal for Privacy Policy -->
+  <div id="privacy-policy-modal" class="modal">
+      <div class="modal-content">
+          <h2>Privacy Policy</h2>
+          <p>
+            Visit https://www.kaiwatanabe.com/aglcprivacy for detailed policy</a>.
+          </p>
+          <button>Close</button>
+      </div>
+  </div>
+
+  <!-- Modal for Equity Statement -->
+  <div id="equity-statement-modal" class="modal">
+      <div class="modal-content">
+          <h2>Equity Statement</h2>
+          <p>
+            This website is designed to be lightweight and accessible, ensuring equitable access for users on slower connections and lower-end devices. It is provided free of charge.
+          </p>
+          <button>Close</button>
+      </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/VincentGarreau/particles.js/particles.min.js"></script>
+</body>
+</html>

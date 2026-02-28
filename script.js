@@ -1,6 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Initialize particles.js
-  // Check if particlesJS is defined before using it
+  // Constants
+  const ANIMATION_DURATION_MS = 300
+  const NOTIFICATION_DISPLAY_MS = 3000
+  const STAGGER_DELAY_MS = 100
+
+  // --- Security Utilities ---
+
+  function escapeHTML(str) {
+    const div = document.createElement("div")
+    div.textContent = str
+    return div.innerHTML
+  }
+
+  function getField(id) {
+    const el = document.getElementById(id)
+    if (!el) return ""
+    return escapeHTML(el.value.trim())
+  }
+
+  // --- Particles.js Init ---
+
   if (typeof particlesJS !== "undefined") {
     particlesJS("particles-js", {
       particles: {
@@ -86,40 +105,45 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("particlesJS is not defined. Make sure the particles.js library is included.")
   }
 
-  // Initialize Flatpickr for date inputs with animation
-  // Check if flatpickr is defined before using it
+  // --- Flatpickr Init (AGLC date format: "15 June 2024") ---
+
   if (typeof flatpickr !== "undefined") {
-    flatpickr("#website-access-date, #newspaper-date, #conference-date", {
-      dateFormat: "d/m/Y",
-      animate: true,
-      disableMobile: false,
-    })
+    flatpickr(
+      "#website-access-date, #newspaper-date, #conference-date, " +
+      "#speech-date, #press-release-date, #parliamentary-date, " +
+      "#submission-date, #interview-date, #social-media-date, " +
+      "#correspondence-date, #treaty-opened-date, #treaty-force-date",
+      {
+        dateFormat: "j F Y",
+        animate: true,
+        disableMobile: false,
+      }
+    )
   } else {
     console.error("flatpickr is not defined. Make sure the Flatpickr library is included.")
   }
 
-  // Hide all citation fields initially with smooth animation
+  // --- Field Visibility ---
+
   function hideAllFields() {
     document.querySelectorAll(".citation-fields").forEach((field) => {
       field.style.opacity = "0"
       setTimeout(() => {
         field.style.display = "none"
-      }, 300)
+      }, ANIMATION_DURATION_MS)
     })
   }
   hideAllFields()
 
-  // Show only the relevant fields based on the selected source type with animation
   function showRelevantFields(sourceType) {
     hideAllFields()
     const selectedFields = document.getElementById(sourceType + "-fields")
     if (selectedFields) {
       setTimeout(() => {
         selectedFields.style.display = "block"
-        // Force reflow
         selectedFields.offsetHeight
         selectedFields.style.opacity = "1"
-      }, 300)
+      }, ANIMATION_DURATION_MS)
     }
   }
 
@@ -127,198 +151,474 @@ document.addEventListener("DOMContentLoaded", () => {
     showRelevantFields(this.value)
   })
 
-  // Toggle display of pinpoint fields with smooth animation
+  // --- Pinpoint Toggles ---
+
   function togglePinpoint(checkboxId, pinpointFieldsId) {
     const checkbox = document.getElementById(checkboxId)
     const pinpointFields = document.getElementById(pinpointFieldsId)
+    if (!checkbox || !pinpointFields) return
 
     checkbox.addEventListener("change", () => {
       if (checkbox.checked) {
         pinpointFields.style.display = "block"
-        // Force reflow
         pinpointFields.offsetHeight
         pinpointFields.style.opacity = "1"
       } else {
         pinpointFields.style.opacity = "0"
         setTimeout(() => {
           pinpointFields.style.display = "none"
-        }, 300)
+        }, ANIMATION_DURATION_MS)
       }
     })
   }
 
+  // Existing pinpoint toggles
   togglePinpoint("case-domestic-pinpoint-toggle", "case-domestic-pinpoint-fields")
   togglePinpoint("case-international-pinpoint-toggle", "case-international-pinpoint-fields")
   togglePinpoint("book-pinpoint-toggle", "book-pinpoint-fields")
   togglePinpoint("journal-pinpoint-toggle", "journal-pinpoint-fields")
   togglePinpoint("legislation-pinpoint-toggle", "legislation-pinpoint-fields")
 
-  // Function to generate the citation from input fields with animation
+  // New pinpoint toggles
+  togglePinpoint("speech-pinpoint-toggle", "speech-pinpoint-fields")
+  togglePinpoint("press-release-pinpoint-toggle", "press-release-pinpoint-fields")
+  togglePinpoint("submission-pinpoint-toggle", "submission-pinpoint-fields")
+  togglePinpoint("film-tv-pinpoint-toggle", "film-tv-pinpoint-fields")
+  togglePinpoint("correspondence-pinpoint-toggle", "correspondence-pinpoint-fields")
+  togglePinpoint("treaty-pinpoint-toggle", "treaty-pinpoint-fields")
+
+  // --- Citation Generators (dispatch map) ---
+
+  const citationGenerators = {
+    "case-domestic": () => {
+      const caseName = getField("case-domestic-name")
+      const reportSeries = getField("case-domestic-report")
+      const year = getField("case-domestic-year")
+      const volume = getField("case-domestic-volume")
+      const startingPage = getField("case-domestic-page")
+      const court = getField("case-domestic-court")
+
+      if (!caseName || !reportSeries || !year || !volume || !startingPage || !court) return ""
+
+      let citation = `<i>${caseName}</i> (${year}) ${volume} <b>${reportSeries}</b> ${startingPage} (${court})`
+      if (document.getElementById("case-domestic-pinpoint-toggle").checked) {
+        const pinpointPage = getField("case-domestic-pinpoint-page")
+        const pinpointParagraph = getField("case-domestic-pinpoint-paragraph")
+        if (pinpointPage) citation += `, ${pinpointPage}`
+        if (pinpointParagraph) citation += ` [${pinpointParagraph}]`
+      }
+      citation += "."
+      return citation
+    },
+
+    "case-international": () => {
+      const caseName = getField("case-international-name")
+      const reportSeries = getField("case-international-report")
+      const year = getField("case-international-year")
+      const volume = getField("case-international-volume")
+      const startingPage = getField("case-international-page")
+      const court = getField("case-international-court")
+
+      if (!caseName || !reportSeries || !year || !court) return ""
+
+      let citation = `<i>${caseName}</i> (${year})`
+      if (volume) citation += ` ${volume}`
+      if (reportSeries) citation += ` <b>${reportSeries}</b>`
+      if (startingPage) citation += ` ${startingPage}`
+      citation += ` (${court})`
+      if (document.getElementById("case-international-pinpoint-toggle").checked) {
+        const pinpointPage = getField("case-international-pinpoint-page")
+        const pinpointParagraph = getField("case-international-pinpoint-paragraph")
+        if (pinpointPage) citation += `, ${pinpointPage}`
+        if (pinpointParagraph) citation += ` [${pinpointParagraph}]`
+      }
+      citation += "."
+      return citation
+    },
+
+    "legislation": () => {
+      const title = getField("legislation-title")
+      const year = getField("legislation-year")
+      const jurisdiction = getField("legislation-jurisdiction")
+
+      if (!title || !year || !jurisdiction) return ""
+
+      let citation = `<i>${title} ${year}</i> (${jurisdiction})`
+      if (document.getElementById("legislation-pinpoint-toggle").checked) {
+        const pinpointSection = getField("legislation-pinpoint-section")
+        const pinpointSubsection = getField("legislation-pinpoint-subsection")
+        if (pinpointSection) citation += ` s ${pinpointSection}`
+        if (pinpointSubsection) citation += `(${pinpointSubsection})`
+      }
+      citation += "."
+      return citation
+    },
+
+    "parliamentary-debates": () => {
+      const jurisdiction = getField("parliamentary-jurisdiction")
+      const chamber = getField("parliamentary-chamber")
+      const date = getField("parliamentary-date")
+      const pinpoint = getField("parliamentary-pinpoint")
+      const speaker = getField("parliamentary-speaker")
+
+      if (!jurisdiction || !date) return ""
+
+      let citation = `${jurisdiction}, <i>Parliamentary Debates</i>, ${chamber ? chamber + ", " : ""}${date}`
+      if (pinpoint) citation += `, ${pinpoint}`
+      if (speaker) citation += ` (${speaker})`
+      citation += "."
+      return citation
+    },
+
+    "written-submission": () => {
+      const author = getField("submission-author")
+      const submissionNo = getField("submission-number")
+      const body = getField("submission-body")
+      const inquiry = getField("submission-inquiry")
+      const date = getField("submission-date")
+
+      if (!author || !body || !inquiry || !date) return ""
+
+      let citation = `${author}, Submission${submissionNo ? " No " + submissionNo : ""} to ${body}, <i>${inquiry}</i> (${date})`
+      if (document.getElementById("submission-pinpoint-toggle").checked) {
+        const pinpoint = getField("submission-pinpoint")
+        if (pinpoint) citation += ` ${pinpoint}`
+      }
+      citation += "."
+      return citation
+    },
+
+    "book": () => {
+      const author = getField("book-author")
+      const title = getField("book-title")
+      const edition = getField("book-edition")
+      const year = getField("book-year")
+      const publisher = getField("book-publisher")
+
+      if (!author || !title || !year || !publisher) return ""
+
+      let citation = `${author}, <i>${title}</i> (${edition ? edition + " ed, " : ""}${publisher}, ${year})`
+      if (document.getElementById("book-pinpoint-toggle").checked) {
+        const pinpointPage = getField("book-pinpoint-page")
+        if (pinpointPage) citation += ` ${pinpointPage}`
+      }
+      citation += "."
+      return citation
+    },
+
+    "journal": () => {
+      const author = getField("journal-author")
+      const title = getField("journal-title")
+      const journalName = getField("journal-name")
+      const volume = getField("journal-volume")
+      const year = getField("journal-year")
+      const startingPage = getField("journal-page")
+
+      if (!author || !title || !journalName || !volume || !year || !startingPage) return ""
+
+      let citation = `${author}, '${title}' (${year}) ${volume} <i>${journalName}</i> ${startingPage}`
+      if (document.getElementById("journal-pinpoint-toggle").checked) {
+        const pinpointPage = getField("journal-pinpoint-page")
+        if (pinpointPage) citation += `, ${pinpointPage}`
+      }
+      citation += "."
+      return citation
+    },
+
+    "encyclopedia": () => {
+      const name = getField("encyclopedia-name")
+      const edition = getField("encyclopedia-edition")
+      const year = getField("encyclopedia-year")
+      const title = getField("encyclopedia-title")
+      const defNumber = getField("encyclopedia-def-number")
+
+      if (!name || !year || !title) return ""
+
+      let citation = `<i>${name}</i> (${edition ? edition + " ed, " : ""}${year}) '${title}'`
+      if (defNumber) citation += ` (def ${defNumber})`
+      citation += "."
+      return citation
+    },
+
+    "thesis": () => {
+      const author = getField("thesis-author")
+      const title = getField("thesis-title")
+      const type = getField("thesis-type")
+      const university = getField("thesis-university")
+      const year = getField("thesis-year")
+
+      if (!author || !title || !type || !university || !year) return ""
+
+      return `${author}, <i>${title}</i> (${type}, ${university}, ${year}).`
+    },
+
+    "report": () => {
+      const author = getField("report-author")
+      const title = getField("report-title")
+      const organization = getField("report-organization")
+      const year = getField("report-year")
+      const url = getField("report-url")
+
+      if (!title || !organization || !year) return ""
+
+      let citation = `${author ? author + ", " : ""}<i>${title}</i> (${organization}, ${year})`
+      if (url) citation += ` &lt;${url}&gt;`
+      citation += "."
+      return citation
+    },
+
+    "newspaper": () => {
+      const author = getField("newspaper-author")
+      const title = getField("newspaper-title")
+      const newspaperName = getField("newspaper-name")
+      const place = getField("newspaper-place")
+      const date = getField("newspaper-date")
+      const page = getField("newspaper-page")
+
+      if (!title || !newspaperName || !date) return ""
+
+      let citation = `${author ? author + ", " : ""}'${title}', <i>${newspaperName}</i> (${place ? place + ", " : ""}${date})`
+      if (page) citation += ` ${page}`
+      citation += "."
+      return citation
+    },
+
+    "website": () => {
+      const author = getField("website-author")
+      const title = getField("website-title")
+      const websiteName = getField("website-name")
+      const docType = getField("website-doc-type")
+      const url = getField("website-url")
+      const accessDate = getField("website-access-date")
+
+      if (!title || !websiteName || !url || !accessDate) return ""
+
+      let citation = `${author ? author + ", " : ""}'${title}', <i>${websiteName}</i> (${docType ? docType + ", " : ""}${accessDate}) &lt;${url}&gt;.`
+      return citation
+    },
+
+    "conference-paper": () => {
+      const author = getField("conference-author")
+      const title = getField("conference-title")
+      const conferenceName = getField("conference-name")
+      const location = getField("conference-location")
+      const date = getField("conference-date")
+      const pages = getField("conference-pages")
+
+      if (!author || !title || !conferenceName || !date) return ""
+
+      let citation = `${author}, '${title}' (Conference Paper, ${conferenceName}, ${location ? location + ", " : ""}${date})`
+      if (pages) citation += ` ${pages}`
+      citation += "."
+      return citation
+    },
+
+    "speech": () => {
+      const speaker = getField("speech-speaker")
+      const title = getField("speech-title")
+      const institution = getField("speech-institution")
+      const date = getField("speech-date")
+
+      if (!speaker || !title || !institution || !date) return ""
+
+      let citation = `${speaker}, '${title}' (Speech, ${institution}, ${date})`
+      if (document.getElementById("speech-pinpoint-toggle").checked) {
+        const pinpoint = getField("speech-pinpoint")
+        if (pinpoint) citation += ` ${pinpoint}`
+      }
+      citation += "."
+      return citation
+    },
+
+    "press-release": () => {
+      const author = getField("press-release-author")
+      const title = getField("press-release-title")
+      const releaseType = getField("press-release-type")
+      const docNo = getField("press-release-docno")
+      const body = getField("press-release-body")
+      const date = getField("press-release-date")
+
+      if (!title || !releaseType || !body || !date) return ""
+
+      let citation = `${author ? author + ", " : ""}'${title}' (${releaseType}${docNo ? " " + docNo : ""}, ${body}, ${date})`
+      if (document.getElementById("press-release-pinpoint-toggle").checked) {
+        const pinpoint = getField("press-release-pinpoint")
+        if (pinpoint) citation += ` ${pinpoint}`
+      }
+      citation += "."
+      return citation
+    },
+
+    "interview": () => {
+      const interviewee = getField("interview-interviewee")
+      const interviewer = getField("interview-interviewer")
+      const forum = getField("interview-forum")
+      const date = getField("interview-date")
+
+      if (!interviewee || !forum || !date) return ""
+
+      return `Interview with ${interviewee} (${interviewer ? interviewer + ", " : ""}${forum}, ${date}).`
+    },
+
+    "film-tv": () => {
+      const episodeTitle = getField("film-tv-episode")
+      const title = getField("film-tv-title")
+      const studio = getField("film-tv-studio")
+      const year = getField("film-tv-year")
+
+      if (!title || !studio || !year) return ""
+
+      let citation = `${episodeTitle ? "'" + episodeTitle + "', " : ""}<i>${title}</i> (${studio}, ${year})`
+      if (document.getElementById("film-tv-pinpoint-toggle").checked) {
+        const pinpoint = getField("film-tv-pinpoint")
+        if (pinpoint) citation += ` ${pinpoint}`
+      }
+      citation += "."
+      return citation
+    },
+
+    "social-media": () => {
+      const username = getField("social-media-username")
+      const title = getField("social-media-title")
+      const platform = getField("social-media-platform")
+      const date = getField("social-media-date")
+      const time = getField("social-media-time")
+      const url = getField("social-media-url")
+
+      if (!username || !title || !platform || !date || !url) return ""
+
+      return `${username}, '${title}' (${platform}, ${date}${time ? ", " + time : ""}) &lt;${url}&gt;.`
+    },
+
+    "correspondence": () => {
+      const type = getField("correspondence-type")
+      const author = getField("correspondence-author")
+      const recipient = getField("correspondence-recipient")
+      const date = getField("correspondence-date")
+
+      if (!type || !author || !recipient || !date) return ""
+
+      let citation = `${type} from ${author} to ${recipient}, ${date}`
+      if (document.getElementById("correspondence-pinpoint-toggle").checked) {
+        const pinpoint = getField("correspondence-pinpoint")
+        if (pinpoint) citation += `, ${pinpoint}`
+      }
+      citation += "."
+      return citation
+    },
+
+    "treaty": () => {
+      const title = getField("treaty-title")
+      const openedDate = getField("treaty-opened-date")
+      const series = getField("treaty-series")
+      const forceDate = getField("treaty-force-date")
+
+      if (!title || !openedDate) return ""
+
+      let citation = `<i>${title}</i>, opened for signature ${openedDate}`
+      if (series) citation += `, ${series}`
+      if (forceDate) citation += ` (entered into force ${forceDate})`
+      if (document.getElementById("treaty-pinpoint-toggle").checked) {
+        const pinpoint = getField("treaty-pinpoint")
+        if (pinpoint) citation += ` ${pinpoint}`
+      }
+      citation += "."
+      return citation
+    },
+  }
+
+  // --- Main Generate Function ---
+
   window.generateCitation = () => {
     const sourceType = document.getElementById("source-type").value
-    let citation = ""
 
-    if (sourceType === "case-domestic") {
-      const caseName = document.getElementById("case-domestic-name").value.trim()
-      const reportSeries = document.getElementById("case-domestic-report").value.trim()
-      const year = document.getElementById("case-domestic-year").value.trim()
-      const volume = document.getElementById("case-domestic-volume").value.trim()
-      const startingPage = document.getElementById("case-domestic-page").value.trim()
-      const court = document.getElementById("case-domestic-court").value.trim()
-      const pinpointPage = document.getElementById("case-domestic-pinpoint-page").value.trim()
-      const pinpointParagraph = document.getElementById("case-domestic-pinpoint-paragraph").value.trim()
-
-      if (caseName && reportSeries && year && volume && startingPage && court) {
-        citation = `<i>${caseName}</i> (${year}) ${volume} <b>${reportSeries}</b> ${startingPage} (${court})`
-        if (document.getElementById("case-domestic-pinpoint-toggle").checked) {
-          if (pinpointPage) citation += `, ${pinpointPage}`
-          if (pinpointParagraph) citation += ` [${pinpointParagraph}]`
-        }
-        citation += "."
-      }
-    } else if (sourceType === "case-international") {
-      const caseName = document.getElementById("case-international-name").value.trim()
-      const reportSeries = document.getElementById("case-international-report").value.trim()
-      const year = document.getElementById("case-international-year").value.trim()
-      const volume = document.getElementById("case-international-volume").value.trim()
-      const startingPage = document.getElementById("case-international-page").value.trim()
-      const court = document.getElementById("case-international-court").value.trim()
-      const pinpointPage = document.getElementById("case-international-pinpoint-page").value.trim()
-      const pinpointParagraph = document.getElementById("case-international-pinpoint-paragraph").value.trim()
-
-      if (caseName && reportSeries && year && court) {
-        citation = `<i>${caseName}</i> (${year})`
-        if (volume) citation += ` ${volume}`
-        if (reportSeries) citation += ` <b>${reportSeries}</b>`
-        if (startingPage) citation += ` ${startingPage}`
-        citation += ` (${court})`
-        if (document.getElementById("case-international-pinpoint-toggle").checked) {
-          if (pinpointPage) citation += `, ${pinpointPage}`
-          if (pinpointParagraph) citation += ` [${pinpointParagraph}]`
-        }
-        citation += "."
-      }
-    } else if (sourceType === "book") {
-      const author = document.getElementById("book-author").value.trim()
-      const title = document.getElementById("book-title").value.trim()
-      const edition = document.getElementById("book-edition").value.trim()
-      const year = document.getElementById("book-year").value.trim()
-      const publisher = document.getElementById("book-publisher").value.trim()
-      const pinpointPage = document.getElementById("book-pinpoint-page").value.trim()
-
-      if (author && title && year && publisher) {
-        citation = `${author}, <i>${title}</i> (${edition ? edition + " ed, " : ""}${publisher}, ${year})`
-        if (document.getElementById("book-pinpoint-toggle").checked && pinpointPage) {
-          citation += ` ${pinpointPage}`
-        }
-        citation += "."
-      }
-    } else if (sourceType === "journal") {
-      const author = document.getElementById("journal-author").value.trim()
-      const title = document.getElementById("journal-title").value.trim()
-      const journalName = document.getElementById("journal-name").value.trim()
-      const volume = document.getElementById("journal-volume").value.trim()
-      const year = document.getElementById("journal-year").value.trim()
-      const startingPage = document.getElementById("journal-page").value.trim()
-      const pinpointPage = document.getElementById("journal-pinpoint-page").value.trim()
-
-      if (author && title && journalName && volume && year && startingPage) {
-        citation = `${author}, '${title}' (${year}) ${volume} <i>${journalName}</i> ${startingPage}`
-        if (document.getElementById("journal-pinpoint-toggle").checked && pinpointPage) {
-          citation += `, ${pinpointPage}`
-        }
-        citation += "."
-      }
-    } else if (sourceType === "legislation") {
-      const title = document.getElementById("legislation-title").value.trim()
-      const year = document.getElementById("legislation-year").value.trim()
-      const jurisdiction = document.getElementById("legislation-jurisdiction").value.trim()
-      const pinpointSection = document.getElementById("legislation-pinpoint-section").value.trim()
-      const pinpointSubsection = document.getElementById("legislation-pinpoint-subsection").value.trim()
-
-      if (title && year && jurisdiction) {
-        citation = `${title} ${year} (${jurisdiction})`
-        if (document.getElementById("legislation-pinpoint-toggle").checked) {
-          if (pinpointSection) citation += ` s ${pinpointSection}`
-          if (pinpointSubsection) citation += `(${pinpointSubsection})`
-        }
-        citation += "."
-      }
-    } else if (sourceType === "website") {
-      const author = document.getElementById("website-author").value.trim()
-      const title = document.getElementById("website-title").value.trim()
-      const websiteName = document.getElementById("website-name").value.trim()
-      const url = document.getElementById("website-url").value.trim()
-      const accessDate = document.getElementById("website-access-date").value.trim()
-
-      if (title && websiteName && url && accessDate) {
-        citation = `${author ? author + ", " : ""}'${title}', <i>${websiteName}</i> (${accessDate}) <${url}>.`
-      }
-    } else if (sourceType === "newspaper") {
-      const author = document.getElementById("newspaper-author").value.trim()
-      const title = document.getElementById("newspaper-title").value.trim()
-      const newspaperName = document.getElementById("newspaper-name").value.trim()
-      const date = document.getElementById("newspaper-date").value.trim()
-      const page = document.getElementById("newspaper-page").value.trim()
-
-      if (title && newspaperName && date) {
-        citation = `${author ? author + ", " : ""}'${title}', <i>${newspaperName}</i> (${date})${page ? ", " + page : ""}.`
-      }
-    } else if (sourceType === "conference-paper") {
-      const author = document.getElementById("conference-author").value.trim()
-      const title = document.getElementById("conference-title").value.trim()
-      const conferenceName = document.getElementById("conference-name").value.trim()
-      const location = document.getElementById("conference-location").value.trim()
-      const date = document.getElementById("conference-date").value.trim()
-      const pages = document.getElementById("conference-pages").value.trim()
-
-      if (author && title && conferenceName && date) {
-        citation = `${author}, '${title}' in <i>${conferenceName}</i> (${location ? location + ", " : ""}${date})${pages ? ", " + pages : ""}.`
-      }
-    } else if (sourceType === "thesis") {
-      const author = document.getElementById("thesis-author").value.trim()
-      const title = document.getElementById("thesis-title").value.trim()
-      const type = document.getElementById("thesis-type").value.trim()
-      const university = document.getElementById("thesis-university").value.trim()
-      const year = document.getElementById("thesis-year").value.trim()
-
-      if (author && title && type && university && year) {
-        citation = `${author}, <i>${title}</i> (${type}, ${university}, ${year}).`
-      }
-    } else if (sourceType === "report") {
-      const author = document.getElementById("report-author").value.trim()
-      const title = document.getElementById("report-title").value.trim()
-      const organization = document.getElementById("report-organization").value.trim()
-      const year = document.getElementById("report-year").value.trim()
-      const url = document.getElementById("report-url").value.trim()
-
-      if (title && organization && year) {
-        citation = `${author ? author + ", " : ""}<i>${title}</i> (${organization}, ${year})${url ? ", " + url : ""}.`
-      }
-    } else if (sourceType === "encyclopedia") {
-      const title = document.getElementById("encyclopedia-title").value.trim()
-      const name = document.getElementById("encyclopedia-name").value.trim()
-      const edition = document.getElementById("encyclopedia-edition").value.trim()
-      const year = document.getElementById("encyclopedia-year").value.trim()
-
-      if (title && name && year) {
-        citation = `${title}, <i>${name}</i> (${edition ? edition + " ed, " : ""}${year}).`
-      }
+    if (!sourceType) {
+      showNotification("Please select a source type.", "error")
+      return
     }
 
-    // Animate the citation result
+    const generator = citationGenerators[sourceType]
+    if (!generator) return
+
+    const citation = generator()
+
+    if (!citation) {
+      showNotification("Please fill in all required fields.", "error")
+      return
+    }
+
     const citationResult = document.getElementById("citation-result")
     citationResult.style.opacity = "0"
     citationResult.style.transform = "translateY(10px)"
 
     setTimeout(() => {
       document.getElementById("generated-citation").innerHTML = citation
+      document.getElementById("copy-citation").style.display = "inline-block"
       citationResult.style.opacity = "1"
       citationResult.style.transform = "translateY(0)"
-    }, 300)
+    }, ANIMATION_DURATION_MS)
   }
 
-  // Save the generated citation with animation
+  // --- Copy to Clipboard ---
+
+  window.copyCitation = () => {
+    const citationEl = document.getElementById("generated-citation")
+    const plainText = citationEl.textContent || citationEl.innerText
+
+    if (!plainText || plainText.trim() === "") {
+      showNotification("No citation to copy.", "error")
+      return
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(plainText).then(() => {
+        showNotification("Citation copied to clipboard!", "success")
+      }).catch(() => {
+        fallbackCopy(plainText)
+      })
+    } else {
+      fallbackCopy(plainText)
+    }
+  }
+
+  function fallbackCopy(text) {
+    const textarea = document.createElement("textarea")
+    textarea.value = text
+    textarea.style.position = "fixed"
+    textarea.style.opacity = "0"
+    document.body.appendChild(textarea)
+    textarea.select()
+    try {
+      document.execCommand("copy")
+      showNotification("Citation copied to clipboard!", "success")
+    } catch (err) {
+      showNotification("Failed to copy citation.", "error")
+    }
+    document.body.removeChild(textarea)
+  }
+
+  // --- Notifications (CSS-class based) ---
+
+  function showNotification(message, type = "error") {
+    const notification = document.createElement("div")
+    notification.className = `notification notification--${type}`
+    notification.textContent = message
+    document.body.appendChild(notification)
+
+    // Force reflow
+    notification.offsetHeight
+    notification.classList.add("show")
+
+    setTimeout(() => {
+      notification.classList.remove("show")
+      setTimeout(() => {
+        document.body.removeChild(notification)
+      }, ANIMATION_DURATION_MS)
+    }, NOTIFICATION_DISPLAY_MS)
+  }
+
+  // --- Save Citation ---
+
   window.saveCitation = () => {
     const citation = document.getElementById("generated-citation").innerHTML
     if (citation && citation.trim() !== "") {
@@ -327,47 +627,14 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("citations", JSON.stringify(citations))
       displaySavedCitations()
       clearForm()
+      showNotification("Citation saved!", "success")
     } else {
-      showNotification("Cannot save an empty citation.")
+      showNotification("Cannot save an empty citation.", "error")
     }
   }
 
-  // Show notification
-  function showNotification(message) {
-    const notification = document.createElement("div")
-    notification.className = "notification"
-    notification.textContent = message
-    notification.style.position = "fixed"
-    notification.style.bottom = "20px"
-    notification.style.right = "20px"
-    notification.style.backgroundColor = "#dc3545"
-    notification.style.color = "white"
-    notification.style.padding = "10px 20px"
-    notification.style.borderRadius = "4px"
-    notification.style.boxShadow = "0 2px 10px rgba(0,0,0,0.2)"
-    notification.style.zIndex = "1000"
-    notification.style.opacity = "0"
-    notification.style.transform = "translateY(20px)"
-    notification.style.transition = "all 0.3s ease"
+  // --- Display Saved Citations ---
 
-    document.body.appendChild(notification)
-
-    // Force reflow
-    notification.offsetHeight
-
-    notification.style.opacity = "1"
-    notification.style.transform = "translateY(0)"
-
-    setTimeout(() => {
-      notification.style.opacity = "0"
-      notification.style.transform = "translateY(20px)"
-      setTimeout(() => {
-        document.body.removeChild(notification)
-      }, 300)
-    }, 3000)
-  }
-
-  // Display saved citations with animation
   function displaySavedCitations() {
     const citations = JSON.parse(localStorage.getItem("citations")) || []
     const citationList = document.getElementById("citation-list")
@@ -384,6 +651,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const deleteButton = document.createElement("button")
       deleteButton.textContent = "Delete"
       deleteButton.className = "delete-button"
+      deleteButton.setAttribute("aria-label", "Delete citation")
       deleteButton.onclick = () => {
         deleteCitation(index)
       }
@@ -396,11 +664,12 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         li.style.opacity = "1"
         li.style.transform = "translateX(0)"
-      }, index * 100)
+      }, index * STAGGER_DELAY_MS)
     })
   }
 
-  // Clear form with animation
+  // --- Clear Form ---
+
   function clearForm() {
     document.getElementById("citation-form").reset()
 
@@ -410,13 +679,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setTimeout(() => {
       document.getElementById("generated-citation").innerHTML = ""
+      document.getElementById("copy-citation").style.display = "none"
       citationResult.style.opacity = "1"
       citationResult.style.transform = "translateY(0)"
       hideAllFields()
-    }, 300)
+    }, ANIMATION_DURATION_MS)
   }
 
-  // Delete citation with animation
+  // --- Delete Citation ---
+
   function deleteCitation(index) {
     const citations = JSON.parse(localStorage.getItem("citations")) || []
     const citationList = document.getElementById("citation-list")
@@ -429,10 +700,11 @@ document.addEventListener("DOMContentLoaded", () => {
       citations.splice(index, 1)
       localStorage.setItem("citations", JSON.stringify(citations))
       displaySavedCitations()
-    }, 300)
+    }, ANIMATION_DURATION_MS)
   }
 
-  // Export citations
+  // --- Export Citations ---
+
   window.exportCitations = () => {
     const citations = JSON.parse(localStorage.getItem("citations")) || []
     if (citations.length > 0) {
@@ -442,6 +714,11 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/<\/?i>/g, "")
             .replace(/<\/?b>/g, "")
             .replace(/<\/?u>/g, "")
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&amp;/g, "&")
+            .replace(/&quot;/g, '"')
+            .replace(/&#039;/g, "'")
         })
         .join("\n\n")
 
@@ -451,13 +728,14 @@ document.addEventListener("DOMContentLoaded", () => {
       a.download = "citations.txt"
       a.click()
 
-      showNotification("Citations exported successfully!")
+      showNotification("Citations exported successfully!", "success")
     } else {
-      showNotification("No citations to export.")
+      showNotification("No citations to export.", "error")
     }
   }
 
-  // Clear all citations
+  // --- Clear All Citations ---
+
   window.clearCitations = () => {
     if (confirm("Are you sure you want to clear all saved citations?")) {
       localStorage.removeItem("citations")
@@ -472,45 +750,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
       setTimeout(() => {
         displaySavedCitations()
-      }, 300)
+      }, ANIMATION_DURATION_MS)
     }
   }
 
-  // Modal handling with animations
-  function setupModal(linkId, modalId) {
-    const link = document.getElementById(linkId)
+  // --- Modal Handling ---
+
+  function closeModal(modal) {
+    modal.classList.remove("show")
+    setTimeout(() => {
+      modal.style.display = "none"
+    }, ANIMATION_DURATION_MS)
+  }
+
+  function openModal(modal) {
+    modal.style.display = "flex"
+    modal.offsetHeight
+    modal.classList.add("show")
+  }
+
+  function setupModalClose(modalId) {
     const modal = document.getElementById(modalId)
     const closeBtn = modal.querySelector("button")
 
-    link.addEventListener("click", (event) => {
-      event.preventDefault()
-      modal.style.display = "flex"
-      // Force reflow
-      modal.offsetHeight
-      modal.classList.add("show")
-    })
+    closeBtn.addEventListener("click", () => closeModal(modal))
 
-    closeBtn.addEventListener("click", () => {
-      modal.classList.remove("show")
-      setTimeout(() => {
-        modal.style.display = "none"
-      }, 300)
-    })
-
-    // Close modal when clicking outside
     modal.addEventListener("click", (event) => {
-      if (event.target === modal) {
-        modal.classList.remove("show")
-        setTimeout(() => {
-          modal.style.display = "none"
-        }, 300)
-      }
+      if (event.target === modal) closeModal(modal)
     })
   }
 
-  setupModal("privacy-policy-link", "privacy-policy-modal")
-  setupModal("equity-statement-link", "equity-statement-modal")
+  function bindModalLink(linkId, modalId) {
+    const link = document.getElementById(linkId)
+    const modal = document.getElementById(modalId)
+    if (!link || !modal) return
 
-  // Initialize saved citations display
+    link.addEventListener("click", (event) => {
+      event.preventDefault()
+      openModal(modal)
+    })
+  }
+
+  setupModalClose("privacy-policy-modal")
+  setupModalClose("equity-statement-modal")
+  setupModalClose("disclaimer-modal")
+
+  bindModalLink("privacy-policy-link", "privacy-policy-modal")
+  bindModalLink("equity-statement-link", "equity-statement-modal")
+  bindModalLink("disclaimer-link", "disclaimer-modal")
+  bindModalLink("disclaimer-link-top", "disclaimer-modal")
+
+  // Escape key handler for modals
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      document.querySelectorAll(".modal.show").forEach((m) => closeModal(m))
+    }
+  })
+
+  // --- Initialize Saved Citations Display ---
+
   displaySavedCitations()
 })

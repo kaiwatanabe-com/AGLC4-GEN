@@ -769,6 +769,8 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.classList.add("show")
   }
 
+  let disclaimerLocked = false
+
   function setupModalClose(modalId) {
     const modal = document.getElementById(modalId)
     const closeBtn = modal.querySelector("button")
@@ -776,7 +778,10 @@ document.addEventListener("DOMContentLoaded", () => {
     closeBtn.addEventListener("click", () => closeModal(modal))
 
     modal.addEventListener("click", (event) => {
-      if (event.target === modal) closeModal(modal)
+      if (event.target === modal) {
+        if (modalId === "disclaimer-modal" && disclaimerLocked) return
+        closeModal(modal)
+      }
     })
   }
 
@@ -803,22 +808,29 @@ document.addEventListener("DOMContentLoaded", () => {
   // Escape key handler for modals
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      document.querySelectorAll(".modal.show").forEach((m) => closeModal(m))
+      document.querySelectorAll(".modal.show").forEach((m) => {
+        if (m.id === "disclaimer-modal" && disclaimerLocked) return
+        closeModal(m)
+      })
     }
   })
 
   // --- First-Load Disclaimer ---
 
   if (!localStorage.getItem("disclaimerAccepted")) {
+    disclaimerLocked = true
     const disclaimerModal = document.getElementById("disclaimer-modal")
     if (disclaimerModal) {
       openModal(disclaimerModal)
       const closeBtn = disclaimerModal.querySelector("button")
-      const onAccept = () => {
-        localStorage.setItem("disclaimerAccepted", "true")
-        closeBtn.removeEventListener("click", onAccept)
+      const originalHandler = () => {
+        closeBtn.removeEventListener("click", originalHandler)
       }
-      closeBtn.addEventListener("click", onAccept)
+      closeBtn.addEventListener("click", originalHandler)
+      closeBtn.addEventListener("click", () => {
+        localStorage.setItem("disclaimerAccepted", "true")
+        disclaimerLocked = false
+      })
     }
   }
 

@@ -200,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!caseName || !reportSeries || !year || !volume || !startingPage || !court) return ""
 
-      let citation = `<i>${caseName}</i> (${year}) ${volume} <b>${reportSeries}</b> ${startingPage} (${court})`
+      let citation = `<i>${caseName}</i> (${year}) ${volume} ${reportSeries} ${startingPage} (${court})`
       if (document.getElementById("case-domestic-pinpoint-toggle").checked) {
         const pinpointPage = getField("case-domestic-pinpoint-page")
         const pinpointParagraph = getField("case-domestic-pinpoint-paragraph")
@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let citation = `<i>${caseName}</i> (${year})`
       if (volume) citation += ` ${volume}`
-      if (reportSeries) citation += ` <b>${reportSeries}</b>`
+      if (reportSeries) citation += ` ${reportSeries}`
       if (startingPage) citation += ` ${startingPage}`
       citation += ` (${court})`
       if (document.getElementById("case-international-pinpoint-toggle").checked) {
@@ -297,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!author || !title || !year || !publisher) return ""
 
-      let citation = `${author}, <i>${title}</i> (${edition ? edition + " ed, " : ""}${publisher}, ${year})`
+      let citation = `${author}, <i>${title}</i> (${publisher}, ${edition ? edition + " ed, " : ""}${year})`
       if (document.getElementById("book-pinpoint-toggle").checked) {
         const pinpointPage = getField("book-pinpoint-page")
         if (pinpointPage) citation += ` ${pinpointPage}`
@@ -349,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!author || !title || !type || !university || !year) return ""
 
-      return `${author}, <i>${title}</i> (${type}, ${university}, ${year}).`
+      return `${author}, '${title}' (${type}, ${university}, ${year}).`
     },
 
     "report": () => {
@@ -806,6 +806,21 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".modal.show").forEach((m) => closeModal(m))
     }
   })
+
+  // --- First-Load Disclaimer ---
+
+  if (!localStorage.getItem("disclaimerAccepted")) {
+    const disclaimerModal = document.getElementById("disclaimer-modal")
+    if (disclaimerModal) {
+      openModal(disclaimerModal)
+      const closeBtn = disclaimerModal.querySelector("button")
+      const onAccept = () => {
+        localStorage.setItem("disclaimerAccepted", "true")
+        closeBtn.removeEventListener("click", onAccept)
+      }
+      closeBtn.addEventListener("click", onAccept)
+    }
+  }
 
   // --- Initialize Saved Citations Display ---
 
